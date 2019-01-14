@@ -16,28 +16,42 @@ enum{
 
 typedef struct{
 	GtkBuilder *builder;
+	GtkWidget *window;
+	GtkListStore *store;
+	GtkTreeIter iter;
 	sList *list;
 	GtkWidget *surname;
 	GtkWidget *firstname;
 	GtkWidget *telnr;
-	GtkWidget *window;
 }app_widgets;
 
-void append_item(sPerson *pers, app_widgets *app_widgets){
-	GtkListStore *store;
-	GtkTreeIter iter;
-	store = GTK_LIST_STORE(gtk_builder_get_object(app_widgets->builder, "daten"));
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, SURNAME, (gchar*)pers->surName, -1);
-	gtk_list_store_set(store, &iter, FIRSTNAME, (gchar*)pers->firstName, -1);
-	gtk_list_store_set(store, &iter, TELNR, (gchar*)pers->telephonNr, -1);
+void append_item(sPerson *pers, app_widgets *widgets){
+	gtk_list_store_append(widgets->store, &(widgets->iter));
+	gtk_list_store_set(widgets->store, &(widgets->iter), SURNAME, (gchar*)pers->surName, -1);
+	gtk_list_store_set(widgets->store, &(widgets->iter), FIRSTNAME, (gchar*)pers->firstName, -1);
+	gtk_list_store_set(widgets->store, &(widgets->iter), TELNR, (gchar*)pers->telephonNr, -1);
 }
 
-void print_list(GtkWidget *widget, app_widgets *app_widgets){
+void print_list(GtkWidget *widget, app_widgets *widgets){
 	sPerson *x;
-	for (x=front(app_widgets->list); x; x=next(app_widgets->list)){
-		append_item(x, app_widgets);
+	for (x=front(widgets->list); x; x=next(widgets->list)){
+		append_item(x, widgets);
 	}
+}
+
+void on_editButton_clicked(GtkWidget *widget, app_widgets *widgets){
+
+}
+
+void on_deleteButton_clicked(GtkWidget *widget, app_widgets *widgets){
+/*	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widgets->list));
+	GtkTreeModel *model;
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(widgets->list));
+	if (gtk_tree_model_get_iter_first(model, &(widgets->iter)==FALSE) return;
+	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(selection)), model, &(widgets->iter))){
+		gtk_list_store_remove(widgets->store, &(widgets->iter));
+	}
+*/		
 }
 
 
@@ -60,33 +74,36 @@ void print_list(GtkWidget *widget, app_widgets *app_widgets){
   gtk_list_store_set(store, &iter, TELNR, tel, -1);
   }
   */
-void on_addButton_clicked(GtkWidget *widget, app_widgets *app_widgets){
-	app_widgets->window  = GTK_WIDGET(gtk_builder_get_object(app_widgets->builder, "newEntryWin"));
-	app_widgets->surname = GTK_WIDGET(gtk_builder_get_object(app_widgets->builder, "surnameEntry"));
-	app_widgets->firstname = GTK_WIDGET(gtk_builder_get_object(app_widgets->builder, "firstNameEntry"));
-	app_widgets->telnr = GTK_WIDGET(gtk_builder_get_object(app_widgets->builder, "telNrEntry"));
+void on_addButton_clicked(GtkWidget *widget, app_widgets *widgets){
+	widgets->window  = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "newEntryWin"));
+	widgets->surname = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "surnameEntry"));
+	widgets->firstname = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "firstNameEntry"));
+	widgets->telnr = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "telNrEntry"));
 
-	gtk_widget_show_all(app_widgets->window);
+	gtk_widget_show_all(widgets->window);
 }
 
-void on_addButton2_clicked(GtkWidget *widget, app_widgets *app_widgets){
+void on_addButton2_clicked(GtkWidget *widget, app_widgets *widgets){
 
-	char *sur = (char*)gtk_entry_get_text(GTK_ENTRY(app_widgets->surname));
-	char *first = (char*)gtk_entry_get_text(GTK_ENTRY(app_widgets->firstname));
-	char *tel = (char*)gtk_entry_get_text(GTK_ENTRY(app_widgets->telnr));
+	char *sur = (char*)gtk_entry_get_text(GTK_ENTRY(widgets->surname));
+	char *first = (char*)gtk_entry_get_text(GTK_ENTRY(widgets->firstname));
+	char *tel = (char*)gtk_entry_get_text(GTK_ENTRY(widgets->telnr));
 	sPerson *pp = getPers(sur, first, tel);
 
 	putPers(pp);
-	push_front(app_widgets->list, pp);
-	append_item(pp, app_widgets);
-	gtk_widget_destroy(app_widgets->window);
+	push_front(widgets->list, pp);
+	append_item(pp, widgets);
+	gtk_widget_hide(widgets->window);
+	gtk_entry_set_text(GTK_ENTRY(widgets->surname), "");
+	gtk_entry_set_text(GTK_ENTRY(widgets->firstname), "");
+	gtk_entry_set_text(GTK_ENTRY(widgets->telnr), "");
 }
 
-void on_mainWindow_destroy(GtkWidget *widgets, app_widgets *app_widgets){
+void on_mainWindow_destroy(GtkWidget *widget, app_widgets *widgets){
 
 	FILE *pf = g_fopen("Daten.csv", "wt");
 	if (!pf); // Warnung ausgeben, Abfragen ob Fenster dennoch geschlossen werden soll
-	printf("%d\n", saveData(app_widgets->list, pf));
+	printf("%d\n", saveData(widgets->list, pf));
 	fclose(pf);
 	gtk_main_quit();
 }
@@ -107,7 +124,7 @@ int main(int argc, char *argv[]){
 	widgets->builder = gtk_builder_new();
 	gtk_builder_add_from_file(widgets->builder, "interface.xml", NULL);
 	mainWindow = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "mainWindow"));
-
+	widgets->store = GTK_LIST_STORE(gtk_builder_get_object(widgets->builder, "data"));
 	gtk_builder_connect_signals(widgets->builder, widgets);
 
 	gtk_widget_show_all(mainWindow);

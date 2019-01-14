@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkListStore" id="daten">
+  <object class="GtkListStore" id="data">
     <columns>
       <!-- column-name Nachname -->
       <column type="gchararray"/>
@@ -14,6 +14,7 @@
   </object>
   <object class="GtkWindow" id="mainWindow">
     <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Telefonverzeichnis</property>
     <property name="default_width">666</property>
     <property name="default_height">450</property>
     <signal name="destroy" handler="on_mainWindow_destroy" swapped="no"/>
@@ -35,7 +36,7 @@
                 <property name="name">list</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="model">daten</property>
+                <property name="model">data</property>
                 <property name="search_column">0</property>
                 <child internal-child="selection">
                   <object class="GtkTreeSelection" id="selection"/>
@@ -89,12 +90,13 @@
             <property name="spacing">7</property>
             <property name="layout_style">center</property>
             <child>
-              <object class="GtkButton" id="edit">
+              <object class="GtkButton" id="editButton">
                 <property name="label" translatable="yes">Bearbeiten</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="has_focus">True</property>
                 <property name="receives_default">True</property>
+                <signal name="clicked" handler="on_editButton_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -103,11 +105,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="delete">
+              <object class="GtkButton" id="deleteButton">
                 <property name="label" translatable="yes">Löschen</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <signal name="clicked" handler="on_deleteButton_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -141,6 +144,7 @@
   </object>
   <object class="GtkWindow" id="newEntryWin">
     <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Eintrag hinzufügen</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
     <property name="destroy_with_parent">True</property>
