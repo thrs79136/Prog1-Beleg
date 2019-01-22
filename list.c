@@ -69,6 +69,13 @@ void pop_back(sList *pl){
 	rmCurr(pl);
 }
 
+void removeItem(sList *pl, void *pValue){
+	for (pl->pCurr=front(pl); pl->pCurr->pData; pl->pCurr=next(pl)){
+		if (pl->pCurr->pData == pValue) rmCurr(pl);
+	}
+
+}
+
 void *front(sList *pl){
 	pl->pCurr = pl->pFront->pNxt;
 	return pl->pCurr->pData;

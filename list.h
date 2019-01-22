@@ -30,6 +30,8 @@ int push_back(sList *pl, void *pData);
 void pop_front(sList *pl);
 // entfernt das letzte Listenelement
 void pop_back(sList *pl);
+// entfernt Listenelemente, die pValue enthalten
+void removeItem(sList *pl, void *pValue);
 
 // gibt einen Pointer auf das erste Listenelement zurück
 void *front(sList *pl);

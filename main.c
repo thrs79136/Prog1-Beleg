@@ -44,14 +44,17 @@ void on_editButton_clicked(GtkWidget *widget, app_widgets *widgets){
 }
 
 void on_deleteButton_clicked(GtkWidget *widget, app_widgets *widgets){
-/*	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widgets->list));
-	GtkTreeModel *model;
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(widgets->list));
-	if (gtk_tree_model_get_iter_first(model, &(widgets->iter)==FALSE) return;
-	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(selection)), model, &(widgets->iter))){
+	GtkTreeView *treeview  = GTK_TREE_VIEW(gtk_builder_get_object(widgets->builder, "treeview"));
+	widgets->store = GTK_LIST_STORE(gtk_builder_get_object(widgets->builder, "data"));
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(treeview));
+	if (gtk_tree_model_get_iter_first(model, &widgets->iter)==FALSE) return;
+	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(selection), &model, &widgets->iter)){
 		gtk_list_store_remove(widgets->store, &(widgets->iter));
+		// Element soll aus Liste entfernt werden
+
 	}
-*/		
+		
 }
 
 
