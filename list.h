@@ -1,4 +1,4 @@
-// Urheber: Theresa Schuettig s79136
+// © by Theresa Schuettig, s79136
 
 #ifndef LIST_H
 #define LIST_H
@@ -14,8 +14,13 @@ typedef struct sList{
    sNode *pCurr;
 }sList;
 
+typedef int (*cmp)(void*, void*);
+
 // erstellt eine Liste, Rückgabewert: Pointer auf Liste, wenn erfolgreich, sonst NULL
 sList *createList();
+// loescht die uebergebene Liste
+void deleteList(sList *pl);
+
 // fuegt Item vor pCurr ein
 int insertBeforeCurr(sList *pl, void *pData);
 // fügt Item hinter pCurr ein
@@ -31,18 +36,25 @@ void pop_front(sList *pl);
 // entfernt das letzte Listenelement
 void pop_back(sList *pl);
 // entfernt Listenelemente, die pValue enthalten
-void removeItem(sList *pl, void *pValue);
+void removeItem(sList *pl, void *pValue, cmp cmpValue);
+// editiert Listenelemente
+//void editItem(sList *pl, void *pValue, cmp cmpValue);
+
+// TO DO
+void insertSorted(sList *pl, void *pData, cmp cmpData);
+// deleteList, die Nodes und Liste freigibt, aber nicht die Eintraege
 
 // gibt einen Pointer auf das erste Listenelement zurück
 void *front(sList *pl);
 // gibt einen Pointer auf das letzte Listenelement zurück
 void *back(sList *pl);
-// gibt einen Pointer auf das nächste Listenelemnt zurück (pCurr->pNxt)
+// gibt einen Pointer auf das nächste Listenelemnt zurück
 void *next(sList *pl);
-// gibt einen Pointer auf das letzte Listenelement zurück (pCurr->pPrv)
+// gibt einen Pointer auf das vorherige Listenelement zurueck
 void *previous(sList *pl);
+// gibt einen Pointer auf das derzeitige Listenelement zurück
+void *current(sList *pl);
 // gibt 1 zurück, wenn die Liste leer ist, sonst 0
 int empty(sList *pl);
 
 #endif
-

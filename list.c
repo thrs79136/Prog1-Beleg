@@ -1,4 +1,4 @@
-// Urheber: Theresa Schuettig s79136
+// © by Theresa Schuettig, s79136
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,6 +17,13 @@ sList *createList(){
 	pl->pFront = pn;
 	pl->pCurr = pn;
 	return pl;
+}
+
+void deleteList(sList *pl){
+	for (front(pl); current(pl); next(pl)){
+		rmCurr(pl);
+	}
+	free(pl);
 }
 
 int insertBeforeCurr(sList *pl, void *pData){
@@ -42,11 +49,11 @@ int insertBehindCurr(sList *pl, void *pData){
 }
 
 void rmCurr(sList *pl){
+	if (pl->pCurr->pData==NULL) return;
 	sNode *pn = pl->pCurr;
 	pl->pCurr->pPrv->pNxt = pl->pCurr->pNxt;
 	pl->pCurr->pNxt->pPrv = pl->pCurr->pPrv;
 	pl->pCurr = pl->pCurr->pNxt;
-	free(pn->pData);
 	free(pn);
 }
 
@@ -69,11 +76,29 @@ void pop_back(sList *pl){
 	rmCurr(pl);
 }
 
-void removeItem(sList *pl, void *pValue){
-	for (pl->pCurr=front(pl); pl->pCurr->pData; pl->pCurr=next(pl)){
-		if (pl->pCurr->pData == pValue) rmCurr(pl);
+void removeItem(sList *pl, void *pValue, cmp cmpValue){
+	for (front(pl); current(pl); next(pl)){
+		if (cmpValue(pValue, pl->pCurr->pData)==0) rmCurr(pl);
+	}
+}
+
+/*void editItem(sList *pl, void *pValue, cmp cmpValue){
+	for (front(pl); current(pl); next(pl)){
+		if (cmpValue(pValue, current(pl))==0) 
 	}
 
+}*/
+
+void insertSorted(sList *pl, void *pData, cmp cmpData){
+	int inserted = 0;
+	for (front(pl); current(pl); next(pl)){
+		if (cmpData(pData, current(pl)) < 0) {
+			insertBeforeCurr(pl, pData);
+			inserted = 1;
+		}
+	}
+	printf("eingefuegt %d\n", inserted);
+	if (!current(pl) && !inserted) push_back(pl, pData);
 }
 
 void *front(sList *pl){
@@ -88,6 +113,10 @@ void *back(sList *pl){
 
 void *next(sList *pl){
 	pl->pCurr = pl->pCurr->pNxt;
+	return pl->pCurr->pData;
+}
+
+void *current(sList *pl){
 	return pl->pCurr->pData;
 }
 
