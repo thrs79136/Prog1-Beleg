@@ -343,6 +343,21 @@
             <property name="top_attach">4</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkLabel" id="numberExistsLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Die eingegebene Telefonnummer
+existiert bereits.</property>
+            <attributes>
+              <attribute name="foreground" value="#a4a400000000"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">5</property>
+          </packing>
+        </child>
       </object>
     </child>
   </object>

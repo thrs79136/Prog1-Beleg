@@ -7,7 +7,7 @@
  * Sortieren im Fenster ermoeglichen
 */
 
-
+#include <signal.h>
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <glib/gprintf.h>
@@ -35,8 +35,8 @@ typedef struct{
 	GtkWidget *telnr;
 }app_widgets;
 
-void append_item(sPerson *pers, app_widgets *widgets){
-	gtk_list_store_append(widgets->store, &(widgets->iter));
+void prepend_item(sPerson *pers, app_widgets *widgets){
+	gtk_list_store_prepend(widgets->store, &(widgets->iter));
 	gtk_list_store_set(	widgets->store, &(widgets->iter),
 						SURNAME, (gchar*)pers->surName,
 						FIRSTNAME, (gchar*)pers->firstName,
@@ -46,7 +46,7 @@ void append_item(sPerson *pers, app_widgets *widgets){
 void print_list(GtkWidget *widget, app_widgets *widgets){
 	sPerson *x;
 	for (x=front(widgets->list); x; x=next(widgets->list)){
-		append_item(x, widgets);
+		prepend_item(x, widgets);
 	}
 }
 
@@ -107,60 +107,43 @@ void on_deleteButton_clicked(GtkWidget *widget, app_widgets *widgets){
 		g_print("%s\n", telNr);
 		// ...und die dazugehoerige Person aus der List entfernt
 		removeItem(widgets->list, (void*)telNr, cmpTelephonNr);
-		
 		// Eintrag wird aus TreeView entfernt
 		gtk_list_store_remove(widgets->store, &widgets->iter);
-
 		// Liste wird aktualisiert angezeigt
 		showList(widgets->list);
 	}
 		
 }
 
-/*void append_item(GtkWidget *widget, app_widgets *app_wdgts){
-  GtkListStore *store;
-  GtkTreeIter iter;
-  g_print("Aufgerufen");
-
-  const gchar *sur = "Reitel";
-  const gchar *first = "Charly";
-  const gchar *tel = "102831293";
-
-  store = GTK_LIST_STORE(gtk_builder_get_object(app_wdgts->builder, "daten"));
-
-  gtk_list_store_append(store, &iter);
-  gtk_list_store_set(store, &iter, SURNAME, sur, -1);
-  gtk_list_store_set(store, &iter, FIRSTNAME, first, -1);
-  gtk_list_store_set(store, &iter, TELNR, tel, -1);
-  }
-  */
+// prueft, ob es sich um einen Buchstaben der deutschen Sprache handelt
+int isletter(char *c){
+	if (isalpha(c[1]) || c[1] =='.' || c[1]==0 ) return 1;
+	if (c[0]==-61 && (c[1]==-92 || c[1]==-74 || c[1]==-68 ||c[1]==-97 ||c[1]==-124 ||c[1]==-100 ||c[1]==-106)) return 1;
+	return 0;
+}
 
 // prueft, ob Eingabe des neuen Eintrags zulaessig ist
-// Telefonnr. existiert noch nicht
-// Eingabefelder sind nicht leer, Telefonnr. beinhaltet nur Ziffern und Namen nur Buchstaben
+// Eingabefelder sind nicht leer, Telefonnr. beinhaltet nur Ziffern und Namen nur Buchstaben und Punkte
 void checkValidInput(GtkWidget *widget, app_widgets *widgets){
 	GtkWidget *button = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "addButton2"));
-	const gchar *sur = gtk_entry_get_text(GTK_ENTRY(widgets->surname));
-	const gchar *first =gtk_entry_get_text(GTK_ENTRY(widgets->firstname));
-	const gchar *tel =gtk_entry_get_text(GTK_ENTRY(widgets->telnr));
-	gboolean isvalid = TRUE;
-	int i;
+	char *sur = (char*)gtk_entry_get_text(GTK_ENTRY(widgets->surname));
+	char *first =(char*)gtk_entry_get_text(GTK_ENTRY(widgets->firstname));
+	char *tel =(char*)gtk_entry_get_text(GTK_ENTRY(widgets->telnr));
+	static gboolean isvalid = FALSE;
 	// ueberprueft, ob eines der Eingabefelder leer ist
-	if (sur[0]==0 || first[0]==0 || tel[0]==0) isvalid=FALSE;
-	for (i=0; sur[i]; i++){
-		gunichar c = g_utf8_get_char(sur+i);
-		if (!g_unichar_isalpha(c) && !g_ascii_isspace(sur[i])) isvalid = FALSE;
-	}
-	for (i=0; first[i]; i++){
-		gunichar c = g_utf8_get_char(first+i);
-		if (!g_unichar_isalpha(c) && !g_ascii_isspace(first[i])) isvalid = FALSE;
-	}
-	for (i=0; tel[i]; i++) if (!g_ascii_isdigit(tel[i])) isvalid=0;
+	if (sur[0]==0 || first[0]==0 || tel[0]==0) isvalid = FALSE;
+	else if (strlen(sur) == 1 && ( !isalpha(sur[strlen(sur)-1]) || sur[strlen(sur)-1]=='.' )) isvalid = FALSE;
+	else if (!isletter(&sur[strlen(sur)-2])) isvalid = FALSE;
+	else if (strlen(first) == 1 && ( !isalpha(first[strlen(first)-1]) || first[strlen(first)-1] == '.' )) isvalid = FALSE;
+	else if (!isletter(&first[strlen(first)-2])) isvalid = FALSE;
+	else if (!isdigit(tel[strlen(tel)-1])) isvalid = FALSE;
+	else isvalid = TRUE;
 	gtk_widget_set_sensitive (button, isvalid);
 }
 
 // Oeffnet Fenster, das das Erstellen eines neuen Eintrags ermoeglicht
 void on_addButton_clicked(GtkWidget *widget, app_widgets *widgets){
+	GtkWidget *warningLabel = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "numberExistsLabel"));
 	GtkWidget *button = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "addButton2"));
 	gtk_widget_set_sensitive (button, FALSE);
 	widgets->window  = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "newEntryWin"));
@@ -169,28 +152,39 @@ void on_addButton_clicked(GtkWidget *widget, app_widgets *widgets){
 	widgets->telnr = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "telNrEntry"));
 
 	gtk_widget_show_all(widgets->window);
+	gtk_widget_hide(warningLabel);
 }
 
 // Neuer Eintrag wurde bestaetigt und wird gespeichert
 void on_addButton2_clicked(GtkWidget *widget, app_widgets *widgets){
-
-	char *sur = (char*)gtk_entry_get_text(GTK_ENTRY(widgets->surname));
-	char *first = (char*)gtk_entry_get_text(GTK_ENTRY(widgets->firstname));
 	char *tel = (char*)gtk_entry_get_text(GTK_ENTRY(widgets->telnr));
-	sPerson *pp = getPers(sur, first, tel);
+	GtkWidget *warningLabel = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "numberExistsLabel"));
+	// Pruefung, ob Telefonnummer bereits existiert
+	int number_exists = 0;
+	sPerson *x;
+	for (x=front(widgets->list); x; x=next(widgets->list)) if (cmpTelephonNr((void*)tel, x) ==0) number_exists = 1;
+	// existiert sie noch nicht, so wird ein neuer Eintrag erstellt
+	if (!number_exists){
+		char *sur = (char*)gtk_entry_get_text(GTK_ENTRY(widgets->surname));
+		char *first = (char*)gtk_entry_get_text(GTK_ENTRY(widgets->firstname));	
+		sPerson *pp = getPers(sur, first, tel);
 
-	putPers(pp);
-	insertSorted(widgets->list, pp, cmpName);
-	showList(widgets->list);
-	append_item(pp, widgets);
-	gtk_widget_hide(widgets->window);
-	gtk_entry_set_text(GTK_ENTRY(widgets->surname), "");
-	gtk_entry_set_text(GTK_ENTRY(widgets->firstname), "");
-	gtk_entry_set_text(GTK_ENTRY(widgets->telnr), "");
+		putPers(pp);
+		push_front(widgets->list, pp);
+		showList(widgets->list);
+		prepend_item(pp, widgets);
+		gtk_widget_hide(widgets->window);
+		gtk_entry_set_text(GTK_ENTRY(widgets->surname), "");
+		gtk_entry_set_text(GTK_ENTRY(widgets->firstname), "");
+		gtk_entry_set_text(GTK_ENTRY(widgets->telnr), "");
+	}	
+	else {
+		gtk_widget_show(warningLabel);
+		g_print("Nummer existiert bereits\n");
+	}
 }
 
 void on_mainWindow_destroy(GtkWidget *widget, app_widgets *widgets){
-
 	FILE *pf = fopen("Daten.csv", "wt");
 	if (!pf); // Warnung ausgeben, Abfragen ob Fenster dennoch geschlossen werden soll
 	printf("%d\n", saveData(widgets->list, pf));
@@ -203,7 +197,6 @@ void on_mainWindow_destroy(GtkWidget *widget, app_widgets *widgets){
 }
 
 int main(int argc, char *argv[]){
-
 
 	GtkWidget *mainWindow;
 	gtk_init(&argc, &argv);
@@ -221,6 +214,9 @@ int main(int argc, char *argv[]){
 	mainWindow = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "mainWindow"));
 	widgets->store = GTK_LIST_STORE(gtk_builder_get_object(widgets->builder, "data"));
 	gtk_builder_connect_signals(widgets->builder, widgets);
+	signal(SIGINT, SIG_IGN);
+	signal(SIGKILL, SIG_IGN);
+	signal(SIGTSTP, SIG_IGN);
 
 	gtk_widget_show_all(mainWindow);
 	print_list(NULL, widgets);

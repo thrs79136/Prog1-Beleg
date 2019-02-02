@@ -29,7 +29,7 @@ sPerson *getPers(char *sur, char *first, char *tel){
 int saveData(sList *pl, FILE *pf){
 	int savedall = OK;
 	sPerson *pp;
-	for (pp=back(pl);pp;pp=previous(pl)){
+	for (pp=front(pl);pp;pp=next(pl)){
 		if (!fprintf(pf, "%s,%s,%s\n", pp->surName, pp->firstName, pp->telephonNr)) savedall=FAIL;
 	}
 	return savedall;
