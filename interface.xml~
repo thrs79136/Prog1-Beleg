@@ -157,9 +157,10 @@
         <property name="halign">center</property>
         <property name="valign">center</property>
         <child>
-          <object class="GtkEntry" id="changeSurnameEntry">
+          <object class="GtkEntry" id="changeFirstNamEntry">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <signal name="changed" handler="checkValidInput" swapped="no"/>
           </object>
           <packing>
             <property name="left_attach">0</property>
@@ -167,9 +168,10 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="changeFirstNameEntry">
+          <object class="GtkEntry" id="changeSurnameEntry">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <signal name="changed" handler="checkValidInput" swapped="no"/>
           </object>
           <packing>
             <property name="left_attach">0</property>
@@ -180,6 +182,7 @@
           <object class="GtkEntry" id="changeTelNrEntry">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <signal name="changed" handler="checkValidInput" swapped="no"/>
           </object>
           <packing>
             <property name="left_attach">0</property>
@@ -225,6 +228,21 @@
             <property name="top_attach">3</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkLabel" id="numberExistsLabel2">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Die eingegebene Telefonnummer
+existiert bereits.</property>
+            <attributes>
+              <attribute name="foreground" value="#a4a400000000"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">4</property>
+          </packing>
+        </child>
       </object>
     </child>
   </object>
@@ -258,12 +276,12 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="surnameEntry">
+          <object class="GtkEntry" id="firstNameEntry">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="margin_left">15</property>
             <property name="margin_right">15</property>
-            <property name="placeholder_text" translatable="yes">Nachname</property>
+            <property name="placeholder_text" translatable="yes">Vorname</property>
             <signal name="changed" handler="checkValidInput" swapped="no"/>
           </object>
           <packing>
@@ -272,12 +290,12 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="firstNameEntry">
+          <object class="GtkEntry" id="surnamEntry">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="margin_left">15</property>
             <property name="margin_right">15</property>
-            <property name="placeholder_text" translatable="yes">Vorname</property>
+            <property name="placeholder_text" translatable="yes">Nachname</property>
             <signal name="changed" handler="checkValidInput" swapped="no"/>
           </object>
           <packing>
@@ -341,6 +359,21 @@
           <packing>
             <property name="left_attach">0</property>
             <property name="top_attach">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="numberExistsLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Die eingegebene Telefonnummer
+existiert bereits.</property>
+            <attributes>
+              <attribute name="foreground" value="#a4a400000000"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">5</property>
           </packing>
         </child>
       </object>

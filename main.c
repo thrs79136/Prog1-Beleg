@@ -28,6 +28,8 @@ typedef struct{
 	sList *list;
 	GtkBuilder *builder;
 	GtkWidget *window;
+	GtkWidget *button;
+	GtkWidget *label;
 	GtkListStore *store;
 	GtkTreeIter iter;
 	GtkWidget *surname;
@@ -56,19 +58,21 @@ void on_saveButton_clicked(GtkWidget *widget, app_widgets *widgets){
 	gFirst = (gchar*)gtk_entry_get_text(GTK_ENTRY(widgets->firstname));
 	gTelNr = (gchar*)gtk_entry_get_text(GTK_ENTRY(widgets->telnr));
 	g_print("%s %s %s\n", gSur, gFirst, gTelNr);
-	int edited = 0;
-	for (next(widgets->list); current(widgets->list) && !edited; next(widgets->list)){
+	for (next(widgets->list); current(widgets->list); next(widgets->list)){
 		if ( cmpTelephonNr((void*)gTelNr, current(widgets->list)) == 0 ){
 			editPers(current(widgets->list), (char*)gSur, (char*)gFirst, (gchar*)gTelNr);
-			edited = 1;
+			break;
 		}
 	}
-	showList(widgets->list);
 	gtk_widget_hide(widgets->window);
+	g_free(gSur); g_free(gFirst); g_free(gTelNr);
 }
 
 // Bearbeiten der Eintraege
+// ! Eintrag muss noch innerhalb des Fensters geandert werden!
 void on_editButton_clicked(GtkWidget *widget, app_widgets *widgets){
+	widgets->label = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "numberExistsLabel2"));
+	widgets->button = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "saveButton"));
 	GtkTreeView *treeview = GTK_TREE_VIEW(gtk_builder_get_object(widgets->builder,"treeview"));
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
 	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(treeview));
@@ -83,6 +87,7 @@ void on_editButton_clicked(GtkWidget *widget, app_widgets *widgets){
 							&gTelNr, -1);
 		widgets->window = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "editEntryWin"));
 		gtk_widget_show_all(widgets->window);
+		gtk_widget_hide(widgets->label);
 
 		widgets->surname = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "changeSurnameEntry"));
 		widgets->firstname = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "changeFirstNameEntry"));
@@ -91,6 +96,7 @@ void on_editButton_clicked(GtkWidget *widget, app_widgets *widgets){
 		gtk_entry_set_text(GTK_ENTRY(widgets->surname), gSur);
 		gtk_entry_set_text(GTK_ENTRY(widgets->firstname), gFirst);
 		gtk_entry_set_text(GTK_ENTRY(widgets->telnr), gTelNr);
+		g_free(gSur); g_free(gFirst); g_free(gTelNr);
 	}
 }
 
@@ -109,15 +115,13 @@ void on_deleteButton_clicked(GtkWidget *widget, app_widgets *widgets){
 		removeItem(widgets->list, (void*)telNr, cmpTelephonNr);
 		// Eintrag wird aus TreeView entfernt
 		gtk_list_store_remove(widgets->store, &widgets->iter);
-		// Liste wird aktualisiert angezeigt
-		showList(widgets->list);
-	}
-		
+	}		
 }
 
-// prueft, ob es sich um einen Buchstaben der deutschen Sprache handelt
+// passenderer Name muss noch gesucht werden
+// prueft, ob es sich um einen Punkt, ein Leerzeichen oder einen Buchstaben der deutschen Sprache handelt
 int isletter(char *c){
-	if (isalpha(c[1]) || c[1] =='.' || c[1]==0 ) return 1;
+	if (isalpha(c[1]) || c[1] =='.' || c[1] ==' '|| c[1]==0 ) return 1;
 	if (c[0]==-61 && (c[1]==-92 || c[1]==-74 || c[1]==-68 ||c[1]==-97 ||c[1]==-124 ||c[1]==-100 ||c[1]==-106)) return 1;
 	return 0;
 }
@@ -125,10 +129,13 @@ int isletter(char *c){
 // prueft, ob Eingabe des neuen Eintrags zulaessig ist
 // Eingabefelder sind nicht leer, Telefonnr. beinhaltet nur Ziffern und Namen nur Buchstaben und Punkte
 void checkValidInput(GtkWidget *widget, app_widgets *widgets){
-	GtkWidget *button = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "addButton2"));
+	widgets->button = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "addButton2"));
 	char *sur = (char*)gtk_entry_get_text(GTK_ENTRY(widgets->surname));
+	puts("a");
 	char *first =(char*)gtk_entry_get_text(GTK_ENTRY(widgets->firstname));
+	puts("b");
 	char *tel =(char*)gtk_entry_get_text(GTK_ENTRY(widgets->telnr));
+	puts("c");
 	static gboolean isvalid = FALSE;
 	// ueberprueft, ob eines der Eingabefelder leer ist
 	if (sur[0]==0 || first[0]==0 || tel[0]==0) isvalid = FALSE;
@@ -138,23 +145,24 @@ void checkValidInput(GtkWidget *widget, app_widgets *widgets){
 	else if (!isletter(&first[strlen(first)-2])) isvalid = FALSE;
 	else if (!isdigit(tel[strlen(tel)-1])) isvalid = FALSE;
 	else isvalid = TRUE;
-	gtk_widget_set_sensitive (button, isvalid);
+	gtk_widget_set_sensitive (widgets->button, isvalid);
 }
 
 // Oeffnet Fenster, das das Erstellen eines neuen Eintrags ermoeglicht
 void on_addButton_clicked(GtkWidget *widget, app_widgets *widgets){
-	GtkWidget *warningLabel = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "numberExistsLabel"));
-	GtkWidget *button = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "addButton2"));
-	gtk_widget_set_sensitive (button, FALSE);
+	widgets->label = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "numberExistsLabel"));
+	widgets->button = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "addButton2"));
+	gtk_widget_set_sensitive (widgets->button, FALSE);
 	widgets->window  = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "newEntryWin"));
 	widgets->surname = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "surnameEntry"));
 	widgets->firstname = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "firstNameEntry"));
 	widgets->telnr = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "telNrEntry"));
 
 	gtk_widget_show_all(widgets->window);
-	gtk_widget_hide(warningLabel);
+	gtk_widget_hide(widgets->label);
 }
 
+// char zu gSur aendern
 // Neuer Eintrag wurde bestaetigt und wird gespeichert
 void on_addButton2_clicked(GtkWidget *widget, app_widgets *widgets){
 	char *tel = (char*)gtk_entry_get_text(GTK_ENTRY(widgets->telnr));
