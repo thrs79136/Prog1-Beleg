@@ -1,6 +1,5 @@
 // © by Theresa Schuettig, s79136
 
-// Abfrage, ob Eintrag wirklich geloescht werden soll
 // Loeschen und Bearbeiten funktioniert noch nicht richtig
 
 #include <gtk/gtk.h>
@@ -134,22 +133,32 @@ void on_editButton_clicked(GtkWidget *widget, app_widgets *widgets){
 	}
 }
 
+// oeffnet Fenster, das Bestaetigung zum Loeschen abfragt
 void on_deleteButton_clicked(GtkWidget *widget, app_widgets *widgets){
+	widgets->selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widgets->treeview));
 	if (gtk_tree_model_get_iter_first(widgets->model, &widgets->iter)==FALSE) return;
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widgets->selection), &widgets->model, &widgets->iter)){
-		widgets->window  = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "queryWindow"));
+		widgets->window  = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "queryWin"));
+		GtkWidget *entryLabel = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "entryLabel"));
+		char *cSur, *cFirst, *cTelNr;
+		gtk_tree_model_get(	widgets->model, &widgets->iter,
+							SURNAME, &cSur,
+							FIRSTNAME, &cFirst,
+							TELNR, &cTelNr, -1);
+		// Speicherplatz fuer Vorname, Leerzeichen, Nachname, Zeilenumbruch und \0
+		char *entry = malloc(strlen(cSur)+strlen(cFirst)+strlen(cTelNr)+3);
+		// fuegt alle Strings zusammen
+		sprintf(entry, "%s %s\n%s", cFirst, cSur, cTelNr);
+		gtk_label_set_text(GTK_LABEL(entryLabel), entry);
 		gtk_widget_show_all(widgets->window);
 	}
 }
 
 void on_yesButton_clicked(GtkWidget *widget, app_widgets *widgets){
-	widgets->selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widgets->treeview));
-	//if (gtk_tree_model_get_iter_first(widgets->model, &widgets->iter)==FALSE) return;
-	//if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widgets->selection), &widgets->model, &widgets->iter)){
 		// Telefonnummer des zu loeschenden Eintrags wird ermittelt...
 		char *telNr;
 		gtk_tree_model_get(widgets->model, &widgets->iter, TELNR, &telNr, -1);
-		// ...und die dazugehoerige Person aus Listen entfernt
+		// ...und die dazugehoerige Person aus den Listen entfernt
 		removeItem(widgets->list, (void*)telNr, cmpTelephonNr);
 		void *pData = removeItem(widgets->sortedList, (void*)telNr, cmpTelephonNr);
 		if (pData) freePers((sPerson*)pData);
@@ -157,7 +166,7 @@ void on_yesButton_clicked(GtkWidget *widget, app_widgets *widgets){
 		showList(widgets->sortedList);
 		// Eintrag wird aus TreeView entfernt
 		gtk_list_store_remove(widgets->store, &widgets->iter);
-			
+		gtk_widget_hide(widgets->window);
 }
 
 // prueft, ob es sich um ein gueltiges Zeichen handelt
