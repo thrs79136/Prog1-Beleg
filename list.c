@@ -79,8 +79,10 @@ void pop_back(sList *pl){
 void *removeItem(sList *pl, void *pValue, cmp cmpValue){
 	void *pData;
 	for (pData=front(pl); pData; pData=next(pl)){
-		if (cmpValue(pValue, pData)==0) rmCurr(pl);
-		return pData;
+		if (cmpValue(pValue, pData)==0) {
+			rmCurr(pl);
+			return pData;
+		}
 	}
 	return NULL;
 }

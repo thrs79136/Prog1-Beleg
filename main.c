@@ -65,6 +65,9 @@ void print_search_results(GtkWidget *widget, app_widgets *widgets){
 }
 
 void print_list(sList *pList, app_widgets *widgets){
+	if (gtk_tree_model_get_iter_first(widgets->model, &widgets->iter) == TRUE){
+		gtk_list_store_clear(widgets->store);
+	}
 	sPerson *pPers;
 	for (pPers=front(pList); pPers; pPers=next(pList)){
 		add_item(pPers, widgets, 1);
@@ -87,19 +90,21 @@ void on_saveButton_clicked(GtkWidget *widget, app_widgets *widgets){
 			if ( cmpTelephonNr((void*)cTelNr, pPers) == 0 ) number_exists=1;
 	}
 	if (!number_exists){
-		// Eintrag in der Liste wird geaendert
+		// Eintrag in der Liste wird geaendert und neu eingefuegt
 		sPerson *pPers;
 		for (pPers=front(widgets->list); pPers; pPers=next(widgets->list)){
 			if ( cmpTelephonNr(cOldNr, pPers) == 0 ){
+					rmCurr(widgets->list);
+					removeItem(widgets->sortedList, cOldNr, cmpTelephonNr);
 					editPers(pPers, cSur, cFirst, cTelNr);
+					push_front(widgets->list, pPers);
+					insertSorted(widgets->sortedList, pPers, cmpName);
 					break;
 			}
 		}
-		// veraendert Eintrag in der TreeView
-		gtk_list_store_set(	widgets->store, &widgets->iter,
-							SURNAME, cSur,
-							FIRSTNAME, cFirst, 
-							TELNR, cTelNr, -1);
+		// zeigt Liste neu an
+		if (widgets->chronSorted) print_list(widgets->list, widgets);
+		else print_list(widgets->sortedList, widgets);
 		gtk_widget_hide(widgets->window);
 	}
 	else gtk_widget_show(widgets->label);
@@ -162,8 +167,6 @@ void on_yesButton_clicked(GtkWidget *widget, app_widgets *widgets){
 		removeItem(widgets->list, (void*)telNr, cmpTelephonNr);
 		void *pData = removeItem(widgets->sortedList, (void*)telNr, cmpTelephonNr);
 		if (pData) freePers((sPerson*)pData);
-		showList(widgets->list);
-		showList(widgets->sortedList);
 		// Eintrag wird aus TreeView entfernt
 		gtk_list_store_remove(widgets->store, &widgets->iter);
 		gtk_widget_hide(widgets->window);
@@ -218,7 +221,8 @@ void on_addButton2_clicked(GtkWidget *widget, app_widgets *widgets){
 	// Pruefung, ob Telefonnummer bereits existiert
 	int number_exists = 0;
 	sPerson *x;
-	for (x=front(widgets->list); x; x=next(widgets->list)) if (cmpTelephonNr((void*)tel, x) ==0) number_exists = 1;
+	for (x=front(widgets->list); x; x=next(widgets->list))
+		if (cmpTelephonNr((void*)tel, x) ==0) number_exists = 1;
 	// existiert sie noch nicht, so wird ein neuer Eintrag erstellt
 	if (!number_exists){
 		char *sur = (char*)gtk_entry_get_text(GTK_ENTRY(widgets->surname));
@@ -239,6 +243,7 @@ void on_addButton2_clicked(GtkWidget *widget, app_widgets *widgets){
 	}
 }
 
+// sortiert Datensaetze
 void on_sortButton_clicked(GtkWidget *widget, app_widgets *widgets){
 	if (gtk_tree_model_get_iter_first(widgets->model, &widgets->iter)==FALSE)
 		return;
@@ -254,10 +259,10 @@ void on_sortButton_clicked(GtkWidget *widget, app_widgets *widgets){
 		gtk_list_store_clear(widgets->store);
 		sList *pList;
 		if (widgets->chronSorted){
-			pList = widgets->sortedList;
+			pList = widgets->list;
 		}
 		else{
-			pList = widgets->list;
+			pList = widgets->sortedList;
 		}	
 		print_list(pList, widgets);
 	}
@@ -303,6 +308,7 @@ int main(int argc, char *argv[]){
 	widgets->model = gtk_tree_view_get_model(GTK_TREE_VIEW(widgets->treeview));
 	widgets->sortButton = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "sortButton"));
 	widgets->searchEntry = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "searchEntry"));
+	// Liste ist bei Start chronologisch sortiert
 	widgets->chronSorted = 1;
 
 	// Signalhandler

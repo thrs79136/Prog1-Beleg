@@ -24,7 +24,7 @@ sPerson *getPers(char *sur, char *first, char *tel);
 int saveData(sList *pl, FILE *pf);
 // liest Daten aus csv-Datei und fuegt sie in Liste ein
 int readData(sList *pList1, sList *pList2, FILE *pf, cmp cmpData);
-int putPers(sPerson* pPers);
+int putPers(void* pPers);
 int editPers(sPerson *pPers, char *sur, char *first, char *tel);
 int freePers(sPerson* pPers); 
 

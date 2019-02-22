@@ -12,11 +12,11 @@
 #include "person.h"
 #include "list.h"
 
-void showList(sList *pList){
+/*void showList(sList *pList){
 	for (front(pList); current(pList); next(pList)){
 		putPers((sPerson*)current(pList));
 	}
-}
+}*/
 
 sPerson *getPers(char *sur, char *first, char *tel){
 	if (!sur || !first || !tel) return NULL;
@@ -54,12 +54,12 @@ int readData(sList *pList1, sList *pList2, FILE *pf, cmp cmpData){
 		push_back(pList1, pPers);
 		if(cmpData && pList2) insertSorted(pList2, pPers, cmpData);	
 	}
-	showList(pList1); showList(pList2);
 	return OK;
 }
 
-int putPers(sPerson *pers){
-printf("%s %s %s\n", pers->surName, pers->firstName, pers->telephonNr);
+int putPers(void *pers){
+sPerson *pPers = (sPerson*) pers;
+printf("%s %s %s\n", pPers->surName, pPers->firstName, pPers->telephonNr);
 return OK;
 }
 
