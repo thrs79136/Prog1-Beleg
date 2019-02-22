@@ -53,7 +53,7 @@ void rmCurr(sList *pl){
 	sNode *pn = pl->pCurr;
 	pl->pCurr->pPrv->pNxt = pl->pCurr->pNxt;
 	pl->pCurr->pNxt->pPrv = pl->pCurr->pPrv;
-	pl->pCurr = pl->pCurr->pNxt;
+	pl->pCurr = pl->pCurr->pPrv;
 	free(pn);
 }
 
@@ -76,18 +76,14 @@ void pop_back(sList *pl){
 	rmCurr(pl);
 }
 
-void removeItem(sList *pl, void *pValue, cmp cmpValue){
-	for (front(pl); current(pl); next(pl)){
-		if (cmpValue(pValue, pl->pCurr->pData)==0) rmCurr(pl);
+void *removeItem(sList *pl, void *pValue, cmp cmpValue){
+	void *pData;
+	for (pData=front(pl); pData; pData=next(pl)){
+		if (cmpValue(pValue, pData)==0) rmCurr(pl);
+		return pData;
 	}
+	return NULL;
 }
-
-/*void editItem(sList *pl, void *pValue, cmp cmpValue){
-	for (front(pl); current(pl); next(pl)){
-		if (cmpValue(pValue, current(pl))==0) 
-	}
-
-}*/
 
 void insertSorted(sList *pl, void *pData, cmp cmpData){
 	int inserted = 0;
@@ -95,9 +91,9 @@ void insertSorted(sList *pl, void *pData, cmp cmpData){
 		if (cmpData(pData, current(pl)) < 0) {
 			insertBeforeCurr(pl, pData);
 			inserted = 1;
+			break;
 		}
 	}
-	printf("eingefuegt %d\n", inserted);
 	if (!current(pl) && !inserted) push_back(pl, pData);
 }
 

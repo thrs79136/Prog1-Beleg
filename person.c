@@ -1,5 +1,9 @@
 // © by Theresa Schuettig, s79136
 
+#ifndef _GNU_SOURCE
+// zur Verwendung von strcasestr
+#define _GNU_SOURCE
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,26 +39,22 @@ int saveData(sList *pl, FILE *pf){
 	return savedall;
 }
 
-int readData(sList *pl, FILE *pf){
-	char buf[512], *p;
+int readData(sList *pList1, sList *pList2, FILE *pf, cmp cmpData){
+	if (!pf || !pList1) return FAIL;
+	char buf[512], *first, *sur, *tel;
+	// Datensaetze werden ausgelesen und neue Personen erstellt
 	while (fgets(buf, 512, pf)){
-		sPerson *ps = malloc(sizeof(sPerson));
-		if (!ps) return FAIL;
-		p = strtok(buf, ",");
-		ps->surName = malloc(strlen(p)+1);
-		if (!ps->surName) return FAIL;
-		strcpy(ps->surName, (char*)p);
-		p = strtok(NULL, ",");
-		ps->firstName = malloc(strlen(p)+1);
-		if (!ps->firstName) return FAIL;
-		strcpy(ps->firstName, (char*)p);
-		p = strtok(NULL, ",");
-		p[strlen(p)-1] = 0;
-		ps->telephonNr = malloc(strlen(p)+1);
-		if (!ps->telephonNr) return FAIL;
-		strcpy(ps->telephonNr, (char*)p);
-		push_front(pl, ps);
+		buf[strlen(buf)-1] = 0;
+		sur = strtok(buf, ",");
+		first = strtok(NULL, ",");
+		tel = strtok(NULL, ",");
+		sPerson *pPers = getPers(sur, first, tel);
+		if (!pPers) return FAIL;
+		// Person wird in b
+		push_back(pList1, pPers);
+		if(cmpData && pList2) insertSorted(pList2, pPers, cmpData);	
 	}
+	showList(pList1); showList(pList2);
 	return OK;
 }
 
@@ -88,12 +88,28 @@ int freePers(sPerson* pPers){
 	return OK;
 }
 
-int cmpTelephonNr(void* number, void* pPerson){
-	return strcmp((char*)number, ((sPerson*)pPerson)->telephonNr);
+int cmpTelephonNr(void* number, void* pPers){
+	return strcmp((char*)number, ((sPerson*)pPers)->telephonNr);
 }
 
 int cmpName(void *pPers1, void *pPers2){
-	int a= strcasecmp(((sPerson*)pPers1)->surName, ((sPerson*)pPers2)->surName);
-	printf("%d\n", a);
-	return a;
+	int ret;
+	ret = strcasecmp(((sPerson*)pPers1)->surName, ((sPerson*)pPers2)->surName);
+	if (ret) return ret;
+	ret = strcasecmp(((sPerson*)pPers1)->firstName, ((sPerson*)pPers2)->firstName);
+	return ret;
+}
+
+int cmpEntry(void *searchKey, void *pPers){
+	sPerson *pPerson = pPers;
+	char *entireName = malloc(strlen(pPerson->firstName)+strlen(pPerson->surName)+1);
+	strcpy(entireName, pPerson->firstName);
+	entireName[strlen(pPerson->firstName)] = ' ';
+	entireName[strlen(pPerson->firstName)+1] = 0;
+	strcat(entireName, pPerson->surName);
+
+	int ret = (!strcasestr(entireName, (char*)searchKey)) ? 0 : 1;
+	if (strstr(pPerson->telephonNr, (char*)searchKey)) ret = 1;
+	free(entireName);
+	return ret;	
 }

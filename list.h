@@ -36,14 +36,9 @@ void pop_front(sList *pl);
 // entfernt das letzte Listenelement
 void pop_back(sList *pl);
 // entfernt Listenelemente, die pValue enthalten
-void removeItem(sList *pl, void *pValue, cmp cmpValue);
-// editiert Listenelemente
-//void editItem(sList *pl, void *pValue, cmp cmpValue);
-
-// TO DO
+void *removeItem(sList *pl, void *pValue, cmp cmpValue);
+// fuegt Elemente sortiert in die Liste ein
 void insertSorted(sList *pl, void *pData, cmp cmpData);
-// deleteList, die Nodes und Liste freigibt, aber nicht die Eintraege
-
 // gibt einen Pointer auf das erste Listenelement zurück
 void *front(sList *pl);
 // gibt einen Pointer auf das letzte Listenelement zurück
