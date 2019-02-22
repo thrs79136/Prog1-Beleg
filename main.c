@@ -157,7 +157,7 @@ void on_yesButton_clicked(GtkWidget *widget, app_widgets *widgets){
 		showList(widgets->sortedList);
 		// Eintrag wird aus TreeView entfernt
 		gtk_list_store_remove(widgets->store, &widgets->iter);
-	}		
+			
 }
 
 // prueft, ob es sich um ein gueltiges Zeichen handelt
