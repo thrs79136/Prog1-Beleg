@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include "person.h"
 #include "list.h"
+#include "gtk.h"
 
 enum{
 	SURNAME=0,
@@ -15,8 +16,6 @@ enum{
 	TELNR,
 	NUM
 };
-
-// evtl. GtkTreeView hinzufuegen
 
 typedef struct{
 	sList *list;
@@ -172,31 +171,26 @@ void on_yesButton_clicked(GtkWidget *widget, app_widgets *widgets){
 		gtk_widget_hide(widgets->window);
 }
 
-// prueft, ob es sich um ein gueltiges Zeichen handelt
-int isValidChar(char *c){
-	if (isalpha(c[1]) || c[1] =='.' || c[1] ==' '|| c[1]==0 || c[1]=='-') return 1;
-	// Pruefung auf äöüÄÖÜß
-	if (c[0]==-61 && (c[1]==-92 || c[1]==-74 || c[1]==-68 ||c[1]==-97 ||c[1]==-124 ||c[1]==-100 ||c[1]==-106)) return 1;
-	return 0;
-}
-
 // prueft, ob Eingabe des neuen Eintrags zulaessig ist, indem bei jeder Aenderung im Eingabefeld das letzte Zeichen ueberprueft wird
 // Eingabefelder sind nicht leer, Telefonnr. beinhaltet nur Ziffern und Namen nur Buchstaben und Punkte
 void checkValidInput(GtkWidget *widget, app_widgets *widgets){
-	widgets->button = GTK_WIDGET(gtk_builder_get_object(widgets->builder, "addButton2"));
 	char *sur = (char*)gtk_entry_get_text(GTK_ENTRY(widgets->surname));
 	char *first =(char*)gtk_entry_get_text(GTK_ENTRY(widgets->firstname));
 	char *tel =(char*)gtk_entry_get_text(GTK_ENTRY(widgets->telnr));
 	static gboolean isvalid = FALSE;
+	if (strlen(tel)>0){
+		if (!isdigit(tel[strlen(tel)-1])){
+			char *tel2 = malloc(strlen(tel));
+			strcpy(tel2, tel);
+			tel2[strlen(tel2)-1] = 0;
+			gtk_entry_set_text(GTK_ENTRY(widgets->telnr), tel2);
+		}
+	}	
 	// ueberprueft, ob eines der Eingabefelder leer ist
 	if (sur[0]==0 || first[0]==0 || tel[0]==0) isvalid = FALSE;
-	else if (strlen(sur) == 1 && ( !isalpha(sur[strlen(sur)-1]) || sur[strlen(sur)-1]=='.' )) isvalid = FALSE;
-	else if (!isValidChar(&sur[strlen(sur)-2])) isvalid = FALSE;
-	else if (strlen(first) == 1 && ( !isalpha(first[strlen(first)-1]) || first[strlen(first)-1] == '.' )) isvalid = FALSE;
-	else if (!isValidChar(&first[strlen(first)-2])) isvalid = FALSE;
-	else if (!isdigit(tel[strlen(tel)-1])) isvalid = FALSE;
 	else isvalid = TRUE;
 	gtk_widget_set_sensitive (widgets->button, isvalid);
+
 }
 
 // Oeffnet Fenster, das das Erstellen eines neuen Eintrags ermoeglicht
@@ -231,7 +225,12 @@ void on_addButton2_clicked(GtkWidget *widget, app_widgets *widgets){
 
 		push_front(widgets->list, pp);
 		insertSorted(widgets->sortedList, pp, cmpName);
-		add_item(pp, widgets, 0);
+		gtk_list_store_clear(widgets->store);
+		if (widgets->chronSorted)
+			print_list(widgets->list, widgets);
+		else
+			print_list(widgets->sortedList, widgets);
+
 		gtk_widget_hide(widgets->window);
 		gtk_entry_set_text(GTK_ENTRY(widgets->surname), "");
 		gtk_entry_set_text(GTK_ENTRY(widgets->firstname), "");
@@ -311,7 +310,7 @@ int main(int argc, char *argv[]){
 	// Liste ist bei Start chronologisch sortiert
 	widgets->chronSorted = 1;
 
-	// Signalhandler
+	// Einrichten der Signalhandler
 	gtk_builder_connect_signals(widgets->builder, widgets);
 
 	gtk_widget_show_all(mainWindow);

@@ -249,6 +249,7 @@
                 <property name="label" translatable="yes">Speichern</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="has_focus">True</property>
                 <property name="receives_default">True</property>
                 <signal name="clicked" handler="on_saveButton_clicked" swapped="no"/>
               </object>
@@ -380,6 +381,7 @@ existiert bereits.</property>
                 <property name="label" translatable="yes">Hinzufügen</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="has_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="margin_top">15</property>
                 <property name="margin_bottom">15</property>
@@ -488,6 +490,7 @@ existiert bereits.</property>
                 <property name="label" translatable="yes">Nein</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="has_focus">True</property>
                 <property name="is_focus">True</property>
                 <property name="receives_default">True</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="queryWin" swapped="yes"/>
