@@ -20,7 +20,8 @@ sList *createList(){
 }
 
 void deleteList(sList *pl){
-	for (front(pl); current(pl); next(pl)){
+	void *pData;
+	for (pData = front(pl); pData; pData=next(pl)){
 		rmCurr(pl);
 	}
 	free(pl);
@@ -28,33 +29,34 @@ void deleteList(sList *pl){
 
 int insertBeforeCurr(sList *pl, void *pData){
 	sNode *pn = malloc(sizeof(sNode));
-	if (!pn) return -1;
+	if (!pn) return 0;
 	pn->pData = pData;
 	pn->pPrv = pl->pCurr->pPrv;
 	pn->pNxt = pl->pCurr;
 	pl->pCurr->pPrv->pNxt = pn;
 	pl->pCurr->pPrv = pn;
-	return 0;
+	return 1;
 }
 
 int insertBehindCurr(sList *pl, void *pData){
 	sNode *pn = malloc(sizeof(sNode));
-	if (!pn) return -1;
+	if (!pn) return 0;
 	pn->pData = pData;
 	pn->pPrv = pl->pCurr;
 	pn->pNxt = pl->pCurr->pNxt;
 	pl->pCurr->pNxt->pPrv = pn;
 	pl->pCurr->pNxt = pn;
-	return 0;
+	return 1;
 }
 
-void rmCurr(sList *pl){
-	if (pl->pCurr->pData==NULL) return;
+int rmCurr(sList *pl){
+	if (pl->pCurr->pData==NULL) return 0;
 	sNode *pn = pl->pCurr;
 	pl->pCurr->pPrv->pNxt = pl->pCurr->pNxt;
 	pl->pCurr->pNxt->pPrv = pl->pCurr->pPrv;
 	pl->pCurr = pl->pCurr->pPrv;
 	free(pn);
+	return 1;
 }
 
 int push_front(sList *pl, void *pData){
@@ -66,14 +68,14 @@ int push_back(sList *pl, void *pData){
 	pl->pCurr = pl->pFront;
 	return insertBeforeCurr(pl, pData);
 }
-void pop_front(sList *pl){
+int pop_front(sList *pl){
 	pl->pCurr = pl->pFront->pNxt;
-	rmCurr(pl);
+	return rmCurr(pl);
 }
 
-void pop_back(sList *pl){
+int pop_back(sList *pl){
 	pl->pCurr = pl->pFront->pPrv;
-	rmCurr(pl);
+	return rmCurr(pl);
 }
 
 void *removeItem(sList *pl, void *pValue, cmp cmpValue){
@@ -87,16 +89,13 @@ void *removeItem(sList *pl, void *pValue, cmp cmpValue){
 	return NULL;
 }
 
-void insertSorted(sList *pl, void *pData, cmp cmpData){
-	int inserted = 0;
+int insertSorted(sList *pl, void *pData, cmp cmpData){
 	for (front(pl); current(pl); next(pl)){
 		if (cmpData(pData, current(pl)) < 0) {
-			insertBeforeCurr(pl, pData);
-			inserted = 1;
 			break;
 		}
 	}
-	if (!current(pl) && !inserted) push_back(pl, pData);
+	return insertBeforeCurr(pl, pData);
 }
 
 void *front(sList *pl){

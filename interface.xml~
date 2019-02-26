@@ -15,6 +15,7 @@
   <object class="GtkWindow" id="mainWindow">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Telefonverzeichnis</property>
+    <property name="window_position">mouse</property>
     <property name="default_width">666</property>
     <property name="default_height">450</property>
     <signal name="destroy" handler="on_mainWindow_destroy" swapped="no"/>
@@ -249,6 +250,7 @@
                 <property name="label" translatable="yes">Speichern</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="has_focus">True</property>
                 <property name="receives_default">True</property>
                 <signal name="clicked" handler="on_saveButton_clicked" swapped="no"/>
               </object>
@@ -277,6 +279,53 @@ existiert bereits.</property>
           <packing>
             <property name="left_attach">0</property>
             <property name="top_attach">4</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="errorWindow">
+    <property name="can_focus">False</property>
+    <property name="type">popup</property>
+    <property name="title" translatable="yes">Fehler</property>
+    <property name="window_position">center</property>
+    <property name="default_width">440</property>
+    <property name="default_height">250</property>
+    <property name="urgency_hint">True</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel" id="errorLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">...</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="okButton2">
+            <property name="label" translatable="yes">OK</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="margin_left">150</property>
+            <property name="margin_right">150</property>
+            <signal name="clicked" handler="gtk_main_quit" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
           </packing>
         </child>
       </object>
@@ -380,6 +429,7 @@ existiert bereits.</property>
                 <property name="label" translatable="yes">Hinzufügen</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="has_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="margin_top">15</property>
                 <property name="margin_bottom">15</property>
@@ -488,6 +538,7 @@ existiert bereits.</property>
                 <property name="label" translatable="yes">Nein</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="has_focus">True</property>
                 <property name="is_focus">True</property>
                 <property name="receives_default">True</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="queryWin" swapped="yes"/>

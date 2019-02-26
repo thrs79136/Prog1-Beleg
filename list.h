@@ -26,19 +26,19 @@ int insertBeforeCurr(sList *pl, void *pData);
 // fügt Item hinter pCurr ein
 int insertBehindCurr(sList *pl, void *pData);
 // entfernt pCurr aus der Liste
-void rmCurr(sList *pl);
+int rmCurr(sList *pl);
 // fügt pData als erstes Listenelement ein
 int push_front(sList *pl, void *pData);
 // fügt pData als letztes Listenelement ein
 int push_back(sList *pl, void *pData);
 // entfernt das erste Listenelement
-void pop_front(sList *pl);
+int pop_front(sList *pl);
 // entfernt das letzte Listenelement
-void pop_back(sList *pl);
+int pop_back(sList *pl);
 // entfernt Listenelemente, die pValue enthalten
 void *removeItem(sList *pl, void *pValue, cmp cmpValue);
 // fuegt Elemente sortiert in die Liste ein
-void insertSorted(sList *pl, void *pData, cmp cmpData);
+int insertSorted(sList *pl, void *pData, cmp cmpData);
 // gibt einen Pointer auf das erste Listenelement zurück
 void *front(sList *pl);
 // gibt einen Pointer auf das letzte Listenelement zurück
