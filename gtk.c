@@ -4,6 +4,8 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <ctype.h>
+#include <string.h>
+#include <stdlib.h>
 #include "person.h"
 #include "list.h"
 #include "gtk.h"

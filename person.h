@@ -3,7 +3,6 @@
 #ifndef PERSON_H
 #define PERSON_H
 
-
 struct sList;
 typedef struct sList sList;
 
@@ -32,7 +31,7 @@ int readData(sList *pList1, sList *pList2, FILE *pf, cmp cmpData);
 
 // vergleicht 2 Telefonnummern
 int cmpTelephonNr(void *number, void *pPers);
-// vergleicht 2 Nachnamen, sind diese gleich wird der Vorname verglichen
+// vergleicht 2 Nachnamen, sind diese gleich werden deren Vornamen verglichen
 int cmpName(void *pPers1, void *pPers2);
 // zur Ueberpruefung, ob Sucheingabe auf einen Eintrag passt
 int cmpEntry(void *searchKey, void *pPers);
