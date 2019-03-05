@@ -214,7 +214,7 @@ void on_mainWindow_destroy(GtkWidget *widget, app_widgets *widgets){
 	deleteList(widgets->sortedList);
 	sPerson *pPers;
 	for (pPers=front(widgets->list); pPers; pPers=next(widgets->list))
-		free(pPers);
+		deletePers(pPers);
 		// Fuer Kontakte resrvierter Speicher wird freigegeben
 	// chronologisch sortierete Liste wird entfernt
 	deleteList(widgets->list);

@@ -24,6 +24,7 @@ void deleteList(sList *pl){
 	for (pData = front(pl); pData; pData=next(pl)){
 		rmCurr(pl);
 	}
+	rmCurr(pl);
 	free(pl);
 }
 
